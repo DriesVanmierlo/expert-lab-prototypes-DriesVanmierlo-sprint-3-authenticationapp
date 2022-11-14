@@ -8,6 +8,7 @@ const LoginScreen = () => {
 
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
+    const [name, setName] = useState('')
 
     const navigation = useNavigation()
 
@@ -16,9 +17,7 @@ const LoginScreen = () => {
             if(user){
                 navigation.replace("Home")
             }
-            
         })
-
         return unsubscribe
     }, [])
 
@@ -28,6 +27,7 @@ const LoginScreen = () => {
             .then(userCredentials => {
                 const user = userCredentials.user;
                 console.log('Registered in with: ', user.email);
+                userCredentials.user.updateProfile({displayName: name})
             })
             .catch(error => alert(error.message))
     }
@@ -48,6 +48,12 @@ const LoginScreen = () => {
         behavior="padding"
     >
       <View style={styles.inputContainer}>
+      <TextInput
+        placeholder='Full name (only for signup)'
+        value={name}
+        onChangeText={text => setName(text)}
+        style={styles.input}
+        />
         <TextInput
         placeholder='Email'
         value={email}
