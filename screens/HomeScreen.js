@@ -10,6 +10,8 @@ import { firebaseConfig, auth, upload} from '../config'
 const HomeScreen = () => {
     const [image, setImage] = useState(null)
     const [loading, setLoading] = useState(false)
+    const [firstName, setFirstName] = useState('')
+    const [lastName, setLastName] = useState('')
     
     const navigation = useNavigation()
 
@@ -21,6 +23,9 @@ const HomeScreen = () => {
         if(auth.currentUser?.photoURL){
             console.log("BEGIN AUTH PHOTO URL",auth.currentUser?.photoURL)
             setImage(auth.currentUser.photoURL)
+            const [firstName, lastName] = auth.currentUser.displayName.split(' ')
+            setFirstName(firstName)
+            setLastName(lastName)
         }
     }, [auth.currentUser])
 
@@ -56,8 +61,10 @@ const HomeScreen = () => {
 
   return (
     <View style={styles.container}>
+        <Text style={{fontWeight: 'bold'}}>Welcome to the app, {firstName}!</Text>
         <Text>Name: {auth.currentUser?.displayName}</Text>
         <Text>Email: {auth.currentUser?.email}</Text>
+        <Text>Phone: {auth.currentUser?.phoneNumber}</Text>
         <TouchableOpacity
             onPress={handleSignOut}
             style={styles.button}

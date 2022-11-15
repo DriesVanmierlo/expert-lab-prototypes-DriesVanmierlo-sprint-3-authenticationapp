@@ -9,7 +9,6 @@ const LoginScreen = () => {
 
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
-    const [name, setName] = useState('')
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged(user => {
@@ -21,14 +20,7 @@ const LoginScreen = () => {
     }, [])
 
     const handleSignup = () => {
-        auth
-            .createUserWithEmailAndPassword(email, password)
-            .then(userCredentials => {
-                const user = userCredentials.user;
-                console.log('Registered in with: ', user.email);
-                userCredentials.user.updateProfile({displayName: name})
-            })
-            .catch(error => alert(error.message))
+        navigation.navigate("Signup")
     }
 
     const handleLogin = () => {
@@ -47,12 +39,6 @@ const LoginScreen = () => {
         behavior="padding"
     >
       <View style={styles.inputContainer}>
-      <TextInput
-        placeholder='Full name (only for signup)'
-        value={name}
-        onChangeText={text => setName(text)}
-        style={styles.input}
-        />
         <TextInput
         placeholder='Email'
         value={email}
@@ -79,7 +65,7 @@ const LoginScreen = () => {
             onPress={handleSignup}
             style={[styles.button, styles.buttonOutline]}
         >
-            <Text style={styles.buttonOutlineText}>Register</Text>
+            <Text style={styles.buttonOutlineText}>Go to signup</Text>
 
         </TouchableOpacity>
       </View>
