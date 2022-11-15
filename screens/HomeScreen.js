@@ -4,7 +4,7 @@ import React, {useState, useEffect} from 'react'
 import { useNavigation } from '@react-navigation/native'
 
 import * as ImagePicker from 'expo-image-picker';
-import { firebaseConfig, auth, upload} from '../config'
+import { firebaseConfig, auth, upload, saveUser } from '../config'
 
 
 const HomeScreen = () => {

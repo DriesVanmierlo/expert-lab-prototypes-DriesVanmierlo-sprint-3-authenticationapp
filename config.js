@@ -1,10 +1,10 @@
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
-
 import { getAuth, updateProfile } from "firebase/compat/auth";
-
 import { ref, uploadBytes, getDownloadURL } from 'firebase/compat/storage';
+
+import { collection, doc, setDoc } from "firebase/firestore"; 
 
 export const firebaseConfig = {
     apiKey: "AIzaSyDFGiabw3T5F3tPw3dYBw7QZ2Y0YXe21oM",
@@ -59,5 +59,35 @@ export async function upload(file, currentUser, setLoading) {
     // const snapshot = await uploadBytes(fileRef, file);
     // setLoading(false);
     // alert("Uploaded!")
+}
+
+export async function saveUser (uid, firstName, lastName, email, phoneNumber, profileURL) {
+
+    const newUser = {
+        "uid": uid,
+        "firstname": firstName,
+        "lastname": lastName,
+        "email": email,
+        "phoneNumber": phoneNumber,
+        "profileURL": profileURL 
+    }
+
+    const db = firebase.firestore()
+
+    // const collectionName = "users/"
+
+    // var ref = firebase.firestore().collection(collectionName).add(newUser)
+
+    // try {
+    //     await ref;
+    // } catch (error){
+    //     console.log(error)
+    // }
+
+    const usersRef = collection(db, "users")
+
+    await setDoc(doc(usersRef, uid), {
+        newUser
+    })
 }
 

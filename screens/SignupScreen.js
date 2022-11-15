@@ -1,6 +1,6 @@
 import { KeyboardAvoidingView, StyleSheet, Text, TextInput, TouchableOpacity, View, Button, Image, Alert } from 'react-native'
 import React, { useEffect, useState, useRef } from 'react'
-import { firebaseConfig, auth, upload} from '../config'
+import { firebaseConfig, auth, upload, saveUser} from '../config'
 import firebase from 'firebase/compat/app'
 import { useNavigation } from '@react-navigation/native'
 import * as ImagePicker from 'expo-image-picker'
@@ -49,18 +49,19 @@ const SignupScreen = () => {
     }
 
     const handleSignup = () => {
-        if(!firstName || !lastName || !email || !password || !image || !phoneVerified){
-            return Alert.alert("All fields must be filled in, and you need to add a profile picture")
+        if(!firstName || !lastName || !email || !password || !image || !phoneVerified || !phoneCredential){
+            return Alert.alert("All fields must be filled in, your phonenumber must be verified and you need to add a profile picture")
         }
 
         auth
             .createUserWithEmailAndPassword(email, password)
             .then(userCredentials => {
                 userCredentials.user.updateProfile({displayName: firstName + ' ' + lastName})
-                userCredentials.user.updatePhoneNumber({credential: phoneCredential})
+                userCredentials.user.updatePhoneNumber(phoneCredential)
                 const uploadImage = handleUpload(image, auth.currentUser, setLoading)
                 const user = userCredentials.user;
                 console.log('Registered in with: ', user.email);
+                saveUser(user.uid, firstName, lastName, user.email, verifiedPhoneNumber, user.photoURL)
                 registerAccount()
             })
             .catch(error => alert(error.message))
@@ -92,34 +93,38 @@ const SignupScreen = () => {
         .verifyPhoneNumber(phoneNumber, recaptchaVerifier.current)
         .then(setVerificationId);
         setSmsWaiting(true)
-      };
+    };
     
-      const confirmCode = () => {
-        const credential = firebase.auth.PhoneAuthProvider.credential(
-            verificationId,
-            code
-        );
-        // firebase.auth().signInWithCredential(credential)
-        //     .then(() => {
-        //         setCode('')
-        //         setSmsWaiting(false)
-        //         setPhoneVerified(true)
-        //     })
-        //     .catch((error) => {
-        //         //show an alert in case of error
-        //         alert(error);
-        //     })
+    const confirmCode = () => {
+      const credential = firebase.auth.PhoneAuthProvider.credential(
+          verificationId,
+          code
+      );
 
-        if(credential){
-            setPhoneCredential(credential)
-            setVerifiedPhoneNumber(phoneNumber)
-            setPhoneVerified(true)
-            setSmsWaiting(false)
-           Alert.alert(
-                'Phone is correctly verified!'
-            ); 
-        }   
-      }
+      console.log("PHONE CREDENTIAL: ", credential)
+      // firebase.auth().signInWithCredential(credential)
+      //     .then(() => {
+      //         setCode('')
+      //         setSmsWaiting(false)
+      //         setPhoneVerified(true)
+      //     })
+      //     .catch((error) => {
+      //         //show an alert in case of error
+      //         alert(error);
+      //     })
+
+    //   firebase.auth().currentUser.updatePhoneNumber
+
+      if(credential){
+        setPhoneCredential(credential)
+        setVerifiedPhoneNumber(phoneNumber)
+        setPhoneVerified(true)
+        setSmsWaiting(false)
+        Alert.alert(
+            'Phone is correctly verified!'
+        );
+      }   
+    }
     
 
   return (
@@ -167,7 +172,6 @@ const SignupScreen = () => {
         style={styles.inputPhone}
         keyboardType='phone-pad'
         autoCompleteType='tel'
-        secureTextEntry
         />
         <TouchableOpacity disabled={smsWaiting || phoneVerified} style={styles.buttonPhone} onPress={sendVerification}>
             <Text style={styles.buttonTextPhone}>Verify SMS</Text>
@@ -181,7 +185,6 @@ const SignupScreen = () => {
         onChangeText={text => setCode(text)}
         style={styles.inputPhone}
         keyboardType='number-pad'
-        secureTextEntry
         />
         <TouchableOpacity  style={styles.buttonPhone} onPress={confirmCode}>
             <Text style={styles.buttonTextPhone}>Confirm code</Text>
