@@ -4,7 +4,7 @@ import 'firebase/compat/firestore';
 import { getAuth, updateProfile } from "firebase/compat/auth";
 import { ref, uploadBytes, getDownloadURL } from 'firebase/compat/storage';
 
-import { collection, doc, setDoc } from "firebase/firestore"; 
+import { collection, doc, setDoc, getDoc } from "firebase/firestore"; 
 
 export const firebaseConfig = {
     apiKey: "AIzaSyDFGiabw3T5F3tPw3dYBw7QZ2Y0YXe21oM",
@@ -22,6 +22,7 @@ if(!firebase.apps.length){
 
 const auth = firebase.auth()
 const storage = firebase.storage()
+const db = firebase.firestore()
 
 export { auth };
 
@@ -63,7 +64,7 @@ export async function upload(file, currentUser, setLoading) {
 
 export async function saveUser (uid, firstName, lastName, email, phoneNumber, profileURL) {
 
-    const newUser = {
+    const user = {
         "uid": uid,
         "firstname": firstName,
         "lastname": lastName,
@@ -72,11 +73,11 @@ export async function saveUser (uid, firstName, lastName, email, phoneNumber, pr
         "profileURL": profileURL 
     }
 
-    const db = firebase.firestore()
+    await db.collection("users").doc(uid).set({user})
 
     // const collectionName = "users/"
 
-    // var ref = firebase.firestore().collection(collectionName).add(newUser)
+    // var ref = firebase.firestore().collection(collectionName).add(user)
 
     // try {
     //     await ref;
@@ -84,10 +85,33 @@ export async function saveUser (uid, firstName, lastName, email, phoneNumber, pr
     //     console.log(error)
     // }
 
-    const usersRef = collection(db, "users")
 
-    await setDoc(doc(usersRef, uid), {
-        newUser
-    })
+
+    // const usersRef = collection(db, "users")
+
+    // await setDoc(doc(usersRef, uid), {
+    //     newUser
+    // })
+}
+
+export async function getUser (uid){
+    const docRef = doc(db, "users", uid)
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+        console.log("Document data:", docSnap.data());
+        return docSnap.data()
+      } else {
+        // doc.data() will be undefined in this case
+        console.log("No such document!");
+      }
+}
+
+export async function addPhotoURLToCurrentUser (user, uid){
+    console.log("PROFILE UPDATE URL", uid, user)
+    const userRef = doc(db, 'users', uid)
+    await setDoc(userRef, { user }, {merge: true})
+
+    // await setDoc(doc(db, 'users', uid), {user})
 }
 

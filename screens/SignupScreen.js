@@ -61,7 +61,7 @@ const SignupScreen = () => {
                 const uploadImage = handleUpload(image, auth.currentUser, setLoading)
                 const user = userCredentials.user;
                 console.log('Registered in with: ', user.email);
-                saveUser(user.uid, firstName, lastName, user.email, verifiedPhoneNumber, user.photoURL)
+                saveUser(user.uid, firstName, lastName, user.email, verifiedPhoneNumber, auth.currentUser.photoURL)
                 registerAccount()
             })
             .catch(error => alert(error.message))
@@ -84,7 +84,7 @@ const SignupScreen = () => {
     }
     
     const handleUpload = async () => {
-        upload(image, auth.currentUser, setLoading)
+        await upload(image, auth.currentUser, setLoading)
     }
 
     const sendVerification = () => {

@@ -4,14 +4,15 @@ import React, {useState, useEffect} from 'react'
 import { useNavigation } from '@react-navigation/native'
 
 import * as ImagePicker from 'expo-image-picker';
-import { firebaseConfig, auth, upload, saveUser } from '../config'
+import { firebaseConfig, auth, upload, saveUser, getUser, addPhotoURLToCurrentUser } from '../config'
 
 
 const HomeScreen = () => {
-    const [image, setImage] = useState(null)
+    const [image, setImage] = useState('')
     const [loading, setLoading] = useState(false)
     const [firstName, setFirstName] = useState('')
     const [lastName, setLastName] = useState('')
+    const [userData, setUserData] = useState(null)
     
     const navigation = useNavigation()
 
@@ -20,12 +21,18 @@ const HomeScreen = () => {
     }, [image])
 
     useEffect(() => {
+        console.log("USE EFFECT", userData);
+    }, [userData])
+
+    useEffect(() => {
         if(auth.currentUser?.photoURL){
             console.log("BEGIN AUTH PHOTO URL",auth.currentUser?.photoURL)
             setImage(auth.currentUser.photoURL)
             const [firstName, lastName] = auth.currentUser.displayName.split(' ')
             setFirstName(firstName)
             setLastName(lastName)
+            getCurrentUser()
+            addPhotoToCurrentUser()
         }
     }, [auth.currentUser])
 
@@ -57,6 +64,22 @@ const HomeScreen = () => {
             })
             .catch(error => alert(error.message))
     }
+    const getCurrentUser = async () => {
+        const userDatas = await getUser(auth.currentUser.uid)
+        setUserData(userDatas)
+        addPhotoToCurrentUser()
+    }
+
+    const addPhotoToCurrentUser = async () => {
+
+        const user = {
+            "profileURL": auth.currentUser.photoURL 
+        }
+
+        const profileURL = auth.currentUser.photoURL
+
+        await addPhotoURLToCurrentUser(user, userData.user.uid)
+    }
 
 
   return (
@@ -64,12 +87,18 @@ const HomeScreen = () => {
         <Text style={{fontWeight: 'bold'}}>Welcome to the app, {firstName}!</Text>
         <Text>Name: {auth.currentUser?.displayName}</Text>
         <Text>Email: {auth.currentUser?.email}</Text>
-        <Text>Phone: {auth.currentUser?.phoneNumber}</Text>
+        <Text>Phone: {userData?.user.phoneNumber}</Text>
         <TouchableOpacity
             onPress={handleSignOut}
             style={styles.button}
         >
             <Text style={styles.buttonText}>Sign out</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+            onPress={getCurrentUser}
+            style={styles.button}
+        >
+            <Text style={styles.buttonText}>Get user info</Text>
         </TouchableOpacity>
         <View style={{ alignItems: 'center', justifyContent: 'center' }}>
             <Button disabled={loading} title="Pick an image from camera roll" onPress={handlePickImage} />
