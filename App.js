@@ -9,6 +9,8 @@ import ImagePickerTest from './screens/ImagePickerTest';
 import Otp from './src';
 import SignupScreen from './screens/SignupScreen';
 import PhoneScreen from './screens/PhoneScreen';
+import QRCodeScreen from './screens/QRCodeScreen';
+import ScanScreen from './screens/ScanScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -21,6 +23,8 @@ export default function App() {
         <Stack.Screen name="Signup" component={SignupScreen} />
         <Stack.Screen name="Otp" component={PhoneScreen} options={{presentation: 'modal'}} />
         <Stack.Screen options={{ headerShown: false }} name="Home" component={HomeScreen} />
+        <Stack.Screen name="QRCode" component={QRCodeScreen} options={{presentation: 'modal'}} />
+        <Stack.Screen name="Scan" component={ScanScreen} options={{presentation: 'modal'}} />
         {/* <Stack.Screen name="Image" component={ImagePickerTest} /> */}
       </Stack.Navigator>
     </NavigationContainer>

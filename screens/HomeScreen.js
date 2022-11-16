@@ -86,6 +86,12 @@ const HomeScreen = () => {
         >
             <Text style={styles.buttonText}>Sign out</Text>
         </TouchableOpacity>
+        <TouchableOpacity
+            onPress={() => {navigation.navigate('QRCode')}}
+            style={styles.button}
+        >
+            <Text style={styles.buttonText}>Share QR code</Text>
+        </TouchableOpacity>
         {/* <TouchableOpacity
             onPress={getCurrentUser}
             style={styles.button}
