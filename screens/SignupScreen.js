@@ -5,6 +5,17 @@ import firebase from 'firebase/compat/app'
 import { useNavigation } from '@react-navigation/native'
 import * as ImagePicker from 'expo-image-picker'
 import { FirebaseRecaptchaVerifierModal } from 'expo-firebase-recaptcha'
+import * as Notifications from "expo-notifications";
+
+
+
+Notifications.setNotificationHandler({
+    handleNotification: async () => {
+      return {
+        shouldShowAlert: true,
+      };
+    },
+  });
 
 const SignupScreen = () => {
 
@@ -26,10 +37,60 @@ const SignupScreen = () => {
     const [phoneVerified, setPhoneVerified] = useState(false)
     const [phoneCredential, setPhoneCredential] = useState(null)
 
+    const [pushToken, setPushToken] = useState()
+
     useEffect(() => {
         console.log(image);
     }, [image])
 
+    useEffect(() => {
+        console.log(pushToken)
+      }, [pushToken])
+
+      useEffect(() => {
+        Notifications.getPermissionsAsync()
+          .then((statusObj) => {
+            if (statusObj.status !== "granted") {
+              return Notifications.requestPermissionsAsync();
+            }
+            return statusObj;
+          })
+          .then((statusObj) => {
+            if (statusObj.status !== "granted") {
+              // alert();
+              throw new Error("Permission not granted.");
+            }
+          })
+          .then(() => {
+            console.log("Getting token..");
+            return Notifications.getExpoPushTokenAsync();
+          })
+          .then((response) => {
+            const token = response.data;
+            setPushToken(token);
+          })
+          .catch((err) => {
+            console.log(err);
+            return null;
+          });
+      }, []);
+
+      useEffect(() => {
+        const backgroundSubscription =
+          Notifications.addNotificationResponseReceivedListener((response) => {
+            console.log(response);
+          });
+    
+        const foregroundSubscription =
+          Notifications.addNotificationReceivedListener((notification) => {
+            console.log(notification);
+          });
+        return () => {
+          backgroundSubscription.remove();
+          foregroundSubscription.remove();
+        };
+      }, []);
+      
     // useEffect(() => {
     //     const unsubscribe = auth.onAuthStateChanged(user => {
     //         if(user){
@@ -49,7 +110,7 @@ const SignupScreen = () => {
     }
 
     const handleSignup = () => {
-        if(!firstName || !lastName || !email || !password || !image || !phoneVerified || !phoneCredential){
+        if(!firstName || !lastName || !email || !password || !image || !phoneVerified || !phoneCredential || !pushToken){
             return Alert.alert("All fields must be filled in, your phonenumber must be verified and you need to add a profile picture")
         }
 
@@ -61,7 +122,10 @@ const SignupScreen = () => {
                 const uploadImage = handleUpload(image, auth.currentUser, setLoading)
                 const user = userCredentials.user;
                 console.log('Registered in with: ', user.email);
-                saveUser(user.uid, firstName, lastName, user.email, verifiedPhoneNumber, auth.currentUser.photoURL)
+
+                //Saving user to firestore
+                saveUser(user.uid, firstName, lastName, user.email, verifiedPhoneNumber, auth.currentUser.photoURL, pushToken)
+
                 registerAccount()
             })
             .catch(error => alert(error.message))

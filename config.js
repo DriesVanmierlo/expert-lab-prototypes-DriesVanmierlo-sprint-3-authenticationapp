@@ -62,7 +62,7 @@ export async function upload(file, currentUser, setLoading) {
     // alert("Uploaded!")
 }
 
-export async function saveUser (uid, firstName, lastName, email, phoneNumber, profileURL) {
+export async function saveUser (uid, firstName, lastName, email, phoneNumber, profileURL, pushToken) {
 
     const user = {
         "uid": uid,
@@ -70,7 +70,8 @@ export async function saveUser (uid, firstName, lastName, email, phoneNumber, pr
         "lastname": lastName,
         "email": email,
         "phoneNumber": phoneNumber,
-        "profileURL": profileURL 
+        "profileURL": profileURL,
+        "pushToken": pushToken 
     }
 
     await db.collection("users").doc(uid).set({user})
@@ -99,7 +100,6 @@ export async function getUser (uid){
     const docSnap = await getDoc(docRef);
 
     if (docSnap.exists()) {
-        console.log("Document data:", docSnap.data());
         return docSnap.data()
       } else {
         // doc.data() will be undefined in this case
@@ -108,7 +108,6 @@ export async function getUser (uid){
 }
 
 export async function addPhotoURLToCurrentUser (user, uid){
-    console.log("PROFILE UPDATE URL", uid, user)
     const userRef = doc(db, 'users', uid)
     await setDoc(userRef, { user }, {merge: true})
 

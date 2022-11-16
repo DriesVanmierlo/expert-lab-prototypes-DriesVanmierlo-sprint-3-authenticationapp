@@ -17,22 +17,15 @@ const HomeScreen = () => {
     const navigation = useNavigation()
 
     useEffect(() => {
-        console.log(image);
-    }, [image])
-
-    useEffect(() => {
-        console.log("USE EFFECT", userData);
-    }, [userData])
-
-    useEffect(() => {
         if(auth.currentUser?.photoURL){
-            console.log("BEGIN AUTH PHOTO URL",auth.currentUser?.photoURL)
             setImage(auth.currentUser.photoURL)
             const [firstName, lastName] = auth.currentUser.displayName.split(' ')
             setFirstName(firstName)
             setLastName(lastName)
             getCurrentUser()
-            addPhotoToCurrentUser()
+            if(!userData?.profileURL){
+                addPhotoToCurrentUser()
+            }
         }
     }, [auth.currentUser])
 
@@ -47,7 +40,6 @@ const HomeScreen = () => {
 
         if (!result.canceled) {
             setImage(result.assets[0].uri)
-            console.log("URIIII", result.assets[0].uri)
         }
         
     }
@@ -78,7 +70,7 @@ const HomeScreen = () => {
 
         const profileURL = auth.currentUser.photoURL
 
-        await addPhotoURLToCurrentUser(user, userData.user.uid)
+        await addPhotoURLToCurrentUser(user, auth.currentUser.uid)
     }
 
 
@@ -94,12 +86,12 @@ const HomeScreen = () => {
         >
             <Text style={styles.buttonText}>Sign out</Text>
         </TouchableOpacity>
-        <TouchableOpacity
+        {/* <TouchableOpacity
             onPress={getCurrentUser}
             style={styles.button}
         >
             <Text style={styles.buttonText}>Get user info</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
         <View style={{ alignItems: 'center', justifyContent: 'center' }}>
             <Button disabled={loading} title="Pick an image from camera roll" onPress={handlePickImage} />
             <Button disabled={loading} title="upload" onPress={handleUpload} />
