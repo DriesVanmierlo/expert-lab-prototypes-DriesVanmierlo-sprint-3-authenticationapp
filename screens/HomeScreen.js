@@ -34,7 +34,7 @@ const HomeScreen = () => {
     const [permission, setPermission] = useState(true)
     const [scanCode, setScanCode] = useState(false)
     
-    const payload = { uid: userData?.user.iud, name: userData?.user.firstName + ' ' + userData?.user.lastName, pushToken: userData?.user.pushToken }
+    const payload = { uid: userData?.user.uid, name: userData?.user.firstname + ' ' + userData?.user.lastname, pushToken: userData?.user.pushToken }
     
     const navigation = useNavigation()
 
