@@ -1,4 +1,5 @@
-import { StyleSheet, Text, TouchableOpacity, View, Button, Image } from 'react-native'
+import { StyleSheet, Text, TouchableOpacity, View, Button, Image, SafeAreaView, ScrollView } from 'react-native'
+import { StatusBar } from 'expo-status-bar';
 import React, {useState, useEffect} from 'react'
 // import { auth } from '../config'
 import { useNavigation } from '@react-navigation/native'
@@ -215,40 +216,58 @@ const HomeScreen = () => {
 
 
   return (
-    <View style={styles.container}>
-        <Text style={{fontWeight: 'bold'}}>Welcome to the app, {firstName}!</Text>
+        <ScrollView style={styles.scrollContainer}>
+
+        
+        <Text style={styles.title}>Welcome to the app, {firstName}!</Text>
         {/* <Text>Name: {auth.currentUser?.displayName}</Text> */}
-        <Text>Name: {firstName} {lastName}</Text>
-        <Text>Email: {auth.currentUser?.email}</Text>
-        <Text>Phone: {userData?.user.phoneNumber}</Text>
-        <TouchableOpacity
-            onPress={handleSignOut}
-            style={styles.button}
-        >
-            <Text style={styles.buttonText}>Sign out</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-            onPress={() => setScanCode(true)}
-            style={styles.button}
-        >
-            <Text style={styles.buttonText}>Scan QR code</Text>
-        </TouchableOpacity>
+        <Text style={styles.infoText}>Name: {firstName} {lastName}</Text>
+        <Text style={styles.infoText}>Email: {auth.currentUser?.email}</Text>
+        <Text style={styles.infoText}>Phone: {userData?.user.phoneNumber}</Text>
         {/* <TouchableOpacity
             onPress={getCurrentUser}
             style={styles.button}
-        >
+            >
             <Text style={styles.buttonText}>Get user info</Text>
         </TouchableOpacity> */}
-        <View style={{ alignItems: 'center', justifyContent: 'center', marginTop: 5 }}>
-            <Button style={styles.button2} disabled={loading} title="Pick an image from camera roll" onPress={handlePickImage} />
-            <Button style={styles.button2} disabled={loading} title="upload" onPress={handleUpload} />
-            {image && <Image source={{ uri: image }} style={{ width: 200, height: 200 }} />}
+        <View style={styles.imageContainer}>
+            {image && <Image source={{ uri: image }} style={styles.image} />}
+            <View style={styles.imageButtonsContainer}>
+                <TouchableOpacity 
+                onPress={() => handlePickImage()}
+                style={styles.buttonImage}>
+                    <Text style={styles.buttonImageText}>New Profile picture</Text>
+                </TouchableOpacity>
+                <TouchableOpacity 
+                    disabled={loading}
+                    style={styles.buttonImage}
+                    onPress={handleUpload}
+                    >
+                    <Text style={styles.buttonImageText}>Upload</Text>
+                </TouchableOpacity>
+            </View>
         </View>
+        <View style={styles.codeContainer}>
+
         <View>
             <QRCode value={JSON.stringify(payload)} />
-            {scanData && <Text>UID: {scanData.uid}, Name: {scanData.name}, pushToken: {scanData.pushToken}</Text>}
         </View>
-    </View>
+        <TouchableOpacity
+            onPress={() => setScanCode(true)}
+            style={styles.codeButton}
+            >
+            <Text style={styles.buttonCodeText}>Add new friend</Text>
+        </TouchableOpacity>
+            </View>
+            {scanData && <Text style={styles.friendTitle}>Your new friends info:</Text>}
+            {scanData && <View><Text> UID: {scanData.uid}, Name: {scanData.name}, pushToken: {scanData.pushToken}</Text></View> }
+    <TouchableOpacity
+        onPress={handleSignOut}
+        style={[styles.button, styles.signoutButton]}
+    >
+        <Text style={styles.signoutButtonText}>Sign out</Text>
+    </TouchableOpacity>
+        </ScrollView>
   )
 }
 
@@ -258,7 +277,21 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         justifyContent: 'center',
-        alignItems: 'center'
+        alignItems: 'center',
+        paddingTop: 40
+    },
+    scrollContainer: {
+        width: '100%',
+        padding: 15,
+        marginTop: 35
+    },
+    title: {
+        fontSize: 25,
+        fontWeight: '800',
+        paddingBottom: 15
+    },
+    infoText: {
+        fontWeight: '300'
     },
     button: {
         backgroundColor: '#0782F9',
@@ -266,14 +299,82 @@ const styles = StyleSheet.create({
         padding: 15,
         borderRadius: 10,
         alignItems: 'center',
-        marginTop: 5
+        marginTop: 5,
+    },
+    signoutButton:{
+        backgroundColor: '#fff',
+        marginTop: 5,
+        borderColor: '#0782F9',
+        borderWidth: 2,
+        width: '100%',
+        marginTop: 180,
+        marginBottom: 25
     },
     button2: {
-        marginTop: 5
+        marginTop: 5,
     },
     buttonText: {
         color: '#fff',
         fontWeight: '700',
         fontSize: 16
     },
+    signoutButtonText:{
+        color: '#0782F9',
+        fontWeight: '700',
+        fontSize: 16
+    },
+    imageContainer: { 
+        marginTop: 5,
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'space-between'
+    },
+    imageButtonsContainer: {
+        display: 'flex',
+        justifyContent: 'center'
+    },
+    image: {
+        width: 150,
+        height: 150,
+        borderRadius: 100,
+        marginTop: 35,
+        marginBottom: 35,
+    },
+    buttonImageText: {
+        color: '#fff',
+        fontWeight: '500',
+        fontSize: 16
+    },
+    buttonImage: {
+        backgroundColor: '#0da2F9',
+        width: '100%',
+        padding: 10,
+        borderRadius: 10,
+        alignItems: 'center',
+        marginTop: 5,
+    },
+    codeContainer: {
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'space-between'
+    },
+    codeButton: {
+        backgroundColor: '#0782F9',
+        width: '45%',
+        padding: 15,
+        borderRadius: 10,
+        alignItems: 'center',
+        marginTop: 5,
+        height: 50
+    },
+    buttonCodeText: {
+        color: '#fff',
+        fontWeight: '500',
+        fontSize: 16
+    },
+    friendTitle: {
+        fontSize: 16,
+        fontWeight: '500',
+        paddingTop: 15
+    }
 })
