@@ -28,7 +28,6 @@ const HomeScreen = () => {
     const [firstName, setFirstName] = useState('')
     const [lastName, setLastName] = useState('')
     const [userData, setUserData] = useState(null)
-
     
     const [scanLoading, setScanLoading] = useState(true)
     const [scanData, setScanData] = useState(null)
@@ -78,10 +77,7 @@ const HomeScreen = () => {
     useEffect(() => {
         if(auth.currentUser?.photoURL){
             setImage(auth.currentUser.photoURL)
-            const firstName = auth.currentUser.displayName
-            const lastName = auth.currentUser.displayName
-            setFirstName(firstName)
-            setLastName(lastName)
+
             getCurrentUser()
             if(!userData?.profileURL){
                 addPhotoToCurrentUser()
@@ -90,10 +86,22 @@ const HomeScreen = () => {
     }, [auth.currentUser])
 
     useEffect(() => {
+        if(userData){
+            setFirstName(userData.user.firstname)
+            setLastName(userData.user.lastname)
+        }
+    }, [userData])
+
+    useEffect(() => {
         if(scanCode){
             requestCameraPermission()
         }
     },[scanCode])
+
+    useEffect(() => {
+        console.log("SCAN DATA", scanData)
+        sendFriendAddNotification()
+    }, [scanData])
 
     const handlePickImage = async () => {
         let result = await ImagePicker.launchImageLibraryAsync({
@@ -124,6 +132,7 @@ const HomeScreen = () => {
     }
     const getCurrentUser = async () => {
         const userDatas = await getUser(auth.currentUser.uid)
+
         setUserData(userDatas)
         addPhotoToCurrentUser()
     }
@@ -161,21 +170,22 @@ const HomeScreen = () => {
     if(scanLoading && scanCode) return (<View style={styles.container}><Text>Requesting permission ...</Text></View>)
     if(scanData && scanCode) {
         setScanCode(false)
-        sendFriendAddNotification
     }
-        // <View style={styles.container}>
-        //     <Text>UID: {scanData.uid}, Name: {scanData.name}, pushToken: {scanData.pushToken}</Text>
-        //     <Button title="Scan again" onPress={() => setScanData(undefined)} />
-        // </View>
+    // <View style={styles.container}>
+    //     <Text>UID: {scanData.uid}, Name: {scanData.name}, pushToken: {scanData.pushToken}</Text>
+    //     <Button title="Scan again" onPress={() => setScanData(undefined)} />
+    // </View>
     if(permission && scanCode) return (
         <BarCodeScanner 
         style={[styles.container]}
         onBarCodeScanned={({type, data}) => {
             try {
+                console.log("DATA INCOMING: ", data)
                 console.log(type)
                 console.log(data)
                 let _data = JSON.parse(data)
                 setScanData(_data)
+                
             } catch (error) {
                 console.log('Unable to parse: ', error)
             }
@@ -186,27 +196,29 @@ const HomeScreen = () => {
     )
 
     const sendFriendAddNotification = async () => {
+        console.log("SEND NOTIFY")
         fetch("https://exp.host/--/api/v2/push/send/", {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Accept-Encoding": "gzip, deflate",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        to: `${scanData?.pushToken}`,
-        data: { extraData: "Some data in the push notification" },
-        title: "New friend added!",
-        body: `You added ${userData?.user.firstName}, go say hello!`,
-      }),
-    });
+            method: "POST",
+            headers: {
+              Accept: "application/json",
+              "Accept-Encoding": "gzip, deflate",
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              to: `${scanData?.pushToken}`,
+              data: { extraData: "Some data in the push notification" },
+              title: "New friend!",
+              body: `${firstName} added you as a friend, go say hello!`,
+            }),
+        });
     }
 
 
   return (
     <View style={styles.container}>
         <Text style={{fontWeight: 'bold'}}>Welcome to the app, {firstName}!</Text>
-        <Text>Name: {auth.currentUser?.displayName}</Text>
+        {/* <Text>Name: {auth.currentUser?.displayName}</Text> */}
+        <Text>Name: {firstName} {lastName}</Text>
         <Text>Email: {auth.currentUser?.email}</Text>
         <Text>Phone: {userData?.user.phoneNumber}</Text>
         <TouchableOpacity
