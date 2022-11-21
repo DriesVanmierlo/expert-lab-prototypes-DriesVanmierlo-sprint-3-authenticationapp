@@ -206,9 +206,9 @@ const HomeScreen = () => {
             },
             body: JSON.stringify({
               to: `${scanData?.pushToken}`,
-              data: { extraData: "Some data in the push notification" },
+              data: { url: `friend/${firstName} ${lastName}` },
               title: "New friend!",
-              body: `${firstName} added you as a friend, go say hello!`,
+              body: `${firstName} added you as a friend, go say hello!`
             }),
         });
     }
